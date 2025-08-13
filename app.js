@@ -17,13 +17,15 @@ const PORT = process.env.PORT || 5001;
 
 // Configure CORS with specific options
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL || 'http://localhost:3000' 
-    : 'http://localhost:3000',
+  origin: [
+    'http://localhost:3000',
+    'https://your-vercel-app.vercel.app', // Add your Vercel URL here
+    process.env.FRONTEND_URL
+  ].filter(Boolean), // This removes any undefined values
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Content-Disposition'],
   credentials: true,
-  optionsSuccessStatus: 200 // Some legacy browsers (IE11, various SmartTVs) choke on 204
+  optionsSuccessStatus: 200
 };
 
 // Middleware
