@@ -13,20 +13,29 @@ Format your response as a JSON array of test cases, where each test case has:
 - expected: The expected output
 - description: Brief description of what this test case checks`;
 
-export async function generateTestCases(problemStatement) {
-  console.log(`[TestCaseGenerator] Generating test cases for problem (${problemStatement?.length || 0} chars)`);
+export async function generateTestCases(problemStatement, modelName = 'gpt-4', additionalInstructions = '') {
+  console.log(`[TestCaseGenerator] Generating test cases`, {
+    problemLength: problemStatement?.length || 0,
+    model: modelName,
+    hasAdditionalInstructions: !!additionalInstructions
+  });
   
   try {
     const chat = new ChatOpenAI({
-      modelName: 'gpt-5'
+      modelName: modelName,
+      temperature: 0.3  // Lower temperature for more deterministic test cases
     });
-
-    console.log('[TestCaseGenerator] Model initialized: gpt-5');
     
-    const prompt = `Please analyze the following coding problem and generate comprehensive test cases.\n\nProblem Statement:\n${problemStatement}`;
+    let prompt = `Please analyze the following coding problem and generate comprehensive test cases.`;
     
-    console.log('[TestCaseGenerator] Sending request to model...');
+    if (additionalInstructions) {
+      prompt += `\n\nAdditional Instructions for Test Cases:\n${additionalInstructions}`;
+    }
+    
+    prompt += `\n\nProblem Statement:\n${problemStatement}`;
+    
     const startTime = Date.now();
+    console.log(`[TestCaseGenerator] Sending request to ${modelName}...`);
     
     const response = await chat.invoke([
       new SystemMessage(systemPrompt),
@@ -43,8 +52,8 @@ export async function generateTestCases(problemStatement) {
     const endTime = Date.now();
     const processingTime = endTime - startTime;
     
-    console.log(`[TestCaseGenerator] Received response in ${processingTime / 1000} seconds`);
-    console.log('[TestCaseGenerator] Raw response length:', response.content?.length || 0);
+    console.log(`[TestCaseGenerator] Received response from ${modelName} in ${(processingTime / 1000).toFixed(2)}s`);
+    console.log(`[TestCaseGenerator] Raw response length: ${response.content?.length || 0} chars`);
     
     try {
       const testCases = JSON.parse(response.content);

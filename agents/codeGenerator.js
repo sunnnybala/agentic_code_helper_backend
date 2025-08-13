@@ -12,19 +12,29 @@ Guidelines:
 5. Use appropriate data structures and algorithms
 6. Format your response in markdown with code blocks`;
 
-export async function processImage(problemStatement, modelName = 'gpt-5-nano') {
-  console.log(`[CodeGenerator] Starting code generation for problem (${problemStatement?.length || 0} chars)`);
-  console.log(`[CodeGenerator] Using model: ${modelName}`);
+export async function processImage(problemStatement, modelName = 'gpt-4', additionalInstructions = '') {
+  console.log(`[CodeGenerator] Starting code generation`, {
+    problemLength: problemStatement?.length || 0,
+    model: modelName,
+    hasAdditionalInstructions: !!additionalInstructions
+  });
   
   try {
     const chat = new ChatOpenAI({
-      modelName: 'gpt-5' // Override parameter to ensure gpt-5-nano is always used
+      modelName: modelName,
+      temperature: 0.7
     });
 
-    const prompt = `Please analyze the following coding problem and provide a complete solution with explanation.\n\nProblem Statement:\n${problemStatement}`;
+    let prompt = `Please analyze the following coding problem and provide a complete solution with explanation.`;
     
-    console.log('[CodeGenerator] Sending request to model...');
+    if (additionalInstructions) {
+      prompt += `\n\nAdditional Instructions:\n${additionalInstructions}`;
+    }
+    
+    prompt += `\n\nProblem Statement:\n${problemStatement}`;
+    
     const startTime = Date.now();
+    console.log(`[CodeGenerator] Sending request to ${modelName}...`);
     
     const response = await chat.invoke([
       new SystemMessage(systemPrompt),
@@ -41,10 +51,8 @@ export async function processImage(problemStatement, modelName = 'gpt-5-nano') {
     const endTime = Date.now();
     const processingTime = endTime - startTime;
     
-    console.log(`[CodeGenerator] Received response in ${processingTime / 1000} seconds`);
+    console.log(`[CodeGenerator] Received response from ${modelName} in ${(processingTime / 1000).toFixed(2)}s`);
     console.log(`[CodeGenerator] Generated solution length: ${response.content?.length || 0} chars`);
-    console.log('[CodeGenerator] First 200 chars of solution:', 
-      response.content ? response.content: 'No content');
 
     return response.content;
   } catch (error) {

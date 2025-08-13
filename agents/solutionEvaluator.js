@@ -17,20 +17,22 @@ Your response should include:
 4. Time and space complexity analysis
 5. Any potential improvements or optimizations`;
 
-export async function evaluateSolutions(solutions, testCases) {
+export async function evaluateSolutions(solutions, testCases, modelName = 'gpt-4') {
   try {
     if (!solutions?.length) {
       throw new Error('No solutions provided for evaluation');
     }
 
-    console.log('[SolutionEvaluator] Starting evaluation of', solutions.length, 'solutions');
-    console.log('[SolutionEvaluator] Test cases:', JSON.stringify(testCases, null, 2));
+    console.log('[SolutionEvaluator] Starting evaluation', {
+      solutionCount: solutions.length,
+      testCaseCount: testCases?.length || 0,
+      model: modelName
+    });
     
     const chat = new ChatOpenAI({
-      modelName: 'gpt-5'
+      modelName: modelName,
+      temperature: 0.2  // Lower temperature for more consistent evaluations
     });
-
-    console.log('[SolutionEvaluator] Model initialized:', 'gpt-5');
 
     const evaluationPrompt = `## Test Cases
 ${JSON.stringify(testCases, null, 2)}
@@ -45,8 +47,8 @@ Please evaluate the solutions above and provide:
 3. The final code in a well-formatted code block
 4. Time and space complexity analysis`;
 
-    console.log('[SolutionEvaluator] Sending evaluation request to model...');
     const startTime = Date.now();
+    console.log(`[SolutionEvaluator] Sending evaluation request to ${modelName}...`);
     
     const response = await chat.invoke([
       new SystemMessage(systemPrompt),
@@ -61,15 +63,18 @@ Please evaluate the solutions above and provide:
     ]);
 
     const endTime = Date.now();
-    console.log(`[SolutionEvaluator] Received response in ${(endTime - startTime) / 1000} seconds`);
+    const processingTime = endTime - startTime;
+    
+    console.log(`[SolutionEvaluator] Received response from ${modelName} in ${(processingTime / 1000).toFixed(2)}s`);
+    console.log(`[SolutionEvaluator] Evaluation response length: ${response.content?.length || 0} chars`);
     console.log('[SolutionEvaluator] Raw response:', JSON.stringify(response, null, 2));
 
     const result = {
       bestSolution: response.content,
       analysis: `Analysis completed. Evaluated ${solutions.length} solutions.`,
       timestamp: new Date().toISOString(),
-      model: 'gpt-5',
-      evaluationTimeMs: endTime - startTime
+      model: modelName,
+      evaluationTimeMs: processingTime
     };
 
     console.log('[SolutionEvaluator] Evaluation completed successfully');

@@ -17,7 +17,14 @@ const upload = multer({
 // Upload and process images
 router.post('/upload', upload.array('images', 3), async (req, res) => {
   const requestId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-  console.log(`[API] [${requestId}] New upload request received, files:`, req.files?.length || 0);
+  const model = req.body.model || 'gpt-4';
+  const additionalInstructions = req.body.additionalInstructions || '';
+  
+  console.log(`[API] [${requestId}] New upload request received`, {
+    files: req.files?.length || 0,
+    model,
+    hasAdditionalInstructions: !!additionalInstructions
+  });
   
   try {
     if (!req.files || req.files.length === 0) {
@@ -55,19 +62,25 @@ router.post('/upload', upload.array('images', 3), async (req, res) => {
       console.log(`[API] [${requestId}] OCR processing completed, problem statement length:`, problemStatement?.length || 0);
 
       console.log(`[API] [${requestId}] Starting parallel generation of solutions and test cases...`);
+      console.log(`[API] [${requestId}] Generating solutions with model: ${model}`);
       const solutionPromises = [
-        processImage(problemStatement, 'gpt-5-nano'),
-        processImage(problemStatement, 'gpt-5-nano'),
-        processImage(problemStatement, 'gpt-5-nano')
+        processImage(problemStatement, model, additionalInstructions),
+        processImage(problemStatement, model, additionalInstructions),
+        processImage(problemStatement, model, additionalInstructions)
       ];
       
+      console.log(`[API] [${requestId}] Starting parallel generation of solutions and test cases...`);
       const [solution1, solution2, solution3, testCases] = await Promise.all([
         ...solutionPromises,
-        generateTestCases(problemStatement)
+        generateTestCases(problemStatement, model, additionalInstructions)
       ]);
 
-      console.log(`[API] [${requestId}] Solutions and test cases generated, evaluating solutions...`);
-      const bestSolution = await evaluateSolutions([solution1, solution2, solution3], testCases);
+      console.log(`[API] [${requestId}] Solutions and test cases generated, evaluating solutions with model: ${model}...`);
+      const bestSolution = await evaluateSolutions(
+        [solution1, solution2, solution3], 
+        testCases,
+        model
+      );
       console.log(`[API] [${requestId}] Solution evaluation completed`);
 
       const response = {
