@@ -22,8 +22,7 @@ export async function generateTestCases(problemStatement, modelName = 'gpt-4', a
   
   try {
     const chat = new ChatOpenAI({
-      modelName: modelName,
-      temperature: 0.3  // Lower temperature for more deterministic test cases
+      modelName: modelName  
     });
     
     let prompt = `Please analyze the following coding problem and generate comprehensive test cases.`;
@@ -33,7 +32,8 @@ export async function generateTestCases(problemStatement, modelName = 'gpt-4', a
     }
     
     prompt += `\n\nProblem Statement:\n${problemStatement}`;
-    
+    console.log(`[TestCaseGenerator] Prompt length: ${prompt.length} chars`);
+    console.log(`[TestCaseGenerator] Prompt: ${prompt}`);
     const startTime = Date.now();
     console.log(`[TestCaseGenerator] Sending request to ${modelName}...`);
     

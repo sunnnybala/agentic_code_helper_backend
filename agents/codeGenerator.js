@@ -21,8 +21,7 @@ export async function processImage(problemStatement, modelName = 'gpt-4', additi
   
   try {
     const chat = new ChatOpenAI({
-      modelName: modelName,
-      temperature: 0.7
+      modelName: modelName
     });
 
     let prompt = `Please analyze the following coding problem and provide a complete solution with explanation.`;
@@ -32,7 +31,8 @@ export async function processImage(problemStatement, modelName = 'gpt-4', additi
     }
     
     prompt += `\n\nProblem Statement:\n${problemStatement}`;
-    
+    console.log(`[CodeGenerator] Prompt length: ${prompt.length} chars`);
+    console.log(`[CodeGenerator] Prompt: ${prompt}`);
     const startTime = Date.now();
     console.log(`[CodeGenerator] Sending request to ${modelName}...`);
     
