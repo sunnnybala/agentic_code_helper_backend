@@ -30,8 +30,7 @@ export async function evaluateSolutions(solutions, testCases, modelName = 'gpt-4
     });
     
     const chat = new ChatOpenAI({
-      modelName: modelName,
-      temperature: 0.2  // Lower temperature for more consistent evaluations
+      modelName: modelName // Lower temperature for more consistent evaluations
     });
 
     const evaluationPrompt = `## Test Cases
