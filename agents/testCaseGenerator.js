@@ -18,10 +18,10 @@ export async function generateTestCases(problemStatement) {
   
   try {
     const chat = new ChatOpenAI({
-      modelName: 'gpt-5-nano'
+      modelName: 'gpt-5'
     });
 
-    console.log('[TestCaseGenerator] Model initialized: gpt-5-nano');
+    console.log('[TestCaseGenerator] Model initialized: gpt-5');
     
     const prompt = `Please analyze the following coding problem and generate comprehensive test cases.\n\nProblem Statement:\n${problemStatement}`;
     

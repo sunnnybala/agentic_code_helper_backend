@@ -17,10 +17,10 @@ export async function processImages(imagesData) {
     console.log('[OCRProcessor] Starting image processing for', imagesData.length, 'images');
     
     const chat = new ChatOpenAI({
-      modelName: 'gpt-5-nano'
+      modelName: 'gpt-5-mini'
     });
 
-    console.log('[OCRProcessor] Model initialized: gpt-5-nano');
+    console.log('[OCRProcessor] Model initialized: gpt-5-mini');
 
     // Prepare image content for the API
     const imageContents = imagesData.map((imageData, index) => {

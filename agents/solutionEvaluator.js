@@ -27,7 +27,7 @@ export async function evaluateSolutions(solutions, testCases) {
     console.log('[SolutionEvaluator] Test cases:', JSON.stringify(testCases, null, 2));
     
     const chat = new ChatOpenAI({
-      modelName: 'gpt-5-nano'
+      modelName: 'gpt-5'
     });
 
     console.log('[SolutionEvaluator] Model initialized:', 'gpt-5');
@@ -68,7 +68,7 @@ Please evaluate the solutions above and provide:
       bestSolution: response.content,
       analysis: `Analysis completed. Evaluated ${solutions.length} solutions.`,
       timestamp: new Date().toISOString(),
-      model: 'gpt-5-nano',
+      model: 'gpt-5',
       evaluationTimeMs: endTime - startTime
     };
 

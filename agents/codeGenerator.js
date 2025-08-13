@@ -18,7 +18,7 @@ export async function processImage(problemStatement, modelName = 'gpt-5-nano') {
   
   try {
     const chat = new ChatOpenAI({
-      modelName: 'gpt-5-nano' // Override parameter to ensure gpt-5-nano is always used
+      modelName: 'gpt-5' // Override parameter to ensure gpt-5-nano is always used
     });
 
     const prompt = `Please analyze the following coding problem and provide a complete solution with explanation.\n\nProblem Statement:\n${problemStatement}`;
