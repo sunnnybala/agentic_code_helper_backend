@@ -19,7 +19,8 @@ const PORT = process.env.PORT || 5001;
 const corsOptions = {
   origin: [
     'http://localhost:3000',
-    'https://agentic-code-helper-frontend-ooinnltd0-firstflys-projects.vercel.app', // Add your Vercel URL here
+    'https://agentic-code-helper-frontend-ooinnltd0-firstflys-projects.vercel.app',
+    'https://agentic-code-helper-frontend.vercel.app',
     process.env.FRONTEND_URL
   ].filter(Boolean), // This removes any undefined values
   methods: ['GET', 'POST', 'OPTIONS'],

@@ -27,7 +27,7 @@ export async function evaluateSolutions(solutions, testCases) {
     console.log('[SolutionEvaluator] Test cases:', JSON.stringify(testCases, null, 2));
     
     const chat = new ChatOpenAI({
-      modelName: 'gpt-5'
+      modelName: 'gpt-5-nano'
     });
 
     console.log('[SolutionEvaluator] Model initialized:', 'gpt-5');
