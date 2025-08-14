@@ -15,7 +15,9 @@ Your response should include:
 2. A clear explanation of why the selected solution is the best
 3. The final code in a well-formatted code block
 4. Time and space complexity analysis
-5. Any potential improvements or optimizations`;
+5. Any potential improvements or optimizations
+
+all the explanations should be as comments in the code block, the final output should be in a code block with the language of the best solution`;
 
 export async function evaluateSolutions(solutions, testCases, modelName = 'gpt-4') {
   try {
