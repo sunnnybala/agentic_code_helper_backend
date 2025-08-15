@@ -21,6 +21,7 @@ const corsOptions = {
     'http://localhost:3000',
     'http://localhost:5173',
     'https://agentic-code-helper-frontend.vercel.app',
+    'https://code-turtle-ai.vercel.app',
     process.env.FRONTEND_URL
   ].filter(Boolean), // This removes any undefined values
   methods: ['GET', 'POST', 'OPTIONS'],
