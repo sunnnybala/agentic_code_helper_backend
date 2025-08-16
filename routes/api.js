@@ -5,7 +5,42 @@ import { processImage } from '../agents/codeGenerator.js';
 import { generateTestCases } from '../agents/testCaseGenerator.js';
 import { evaluateSolutions } from '../agents/solutionEvaluator.js';
 
+// Store active clients for SSE
+const clients = new Map();
+
 const router = express.Router();
+
+// SSE endpoint for progress updates
+router.get('/progress', (req, res) => {
+  const clientId = Date.now();
+  const newClient = {
+    id: clientId,
+    res
+  };
+
+  // Set headers for SSE
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+
+  // Store the client
+  clients.set(clientId, newClient);
+
+  // Remove client on connection close
+  req.on('close', () => {
+    clients.delete(clientId);
+  });
+});
+
+// Helper function to send progress updates to all clients
+const sendProgressUpdate = (update) => {
+  const data = `data: ${JSON.stringify(update)}\n\n`;
+  clients.forEach(client => {
+    client.res.write(data);
+  });
+};
 
 // Configure multer for file uploads
 const storage = multer.memoryStorage();
@@ -58,22 +93,29 @@ router.post('/upload', upload.array('images', 3), async (req, res) => {
 
     try {
       console.log(`[API] [${requestId}] Starting OCR processing...`);
+      
       const problemStatement = await processImages(imagesData);
       console.log(`[API] [${requestId}] OCR processing completed, problem statement length:`, problemStatement?.length || 0);
-
+      sendProgressUpdate({ imageProcessed: true });
       console.log(`[API] [${requestId}] Starting parallel generation of solutions and test cases...`);
       console.log(`[API] [${requestId}] Generating solutions with model: ${model}`);
+      
+      // Start both code generation and test case generation in parallel
       const solutionPromises = [
         processImage(problemStatement, model, additionalInstructions),
         processImage(problemStatement, model, additionalInstructions),
         processImage(problemStatement, model, additionalInstructions)
       ];
       
-      console.log(`[API] [${requestId}] Starting parallel generation of solutions and test cases...`);
-      const [solution1, solution2, solution3, testCases] = await Promise.all([
-        ...solutionPromises,
-        generateTestCases(problemStatement, model, additionalInstructions)
-      ]);
+      const testCasesPromise = generateTestCases(problemStatement, model, additionalInstructions);
+      
+      // Wait for code generation to complete first
+      const [solution1, solution2, solution3] = await Promise.all(solutionPromises);
+      sendProgressUpdate({ codeGenerated: true });
+      
+      // Then wait for test case generation to complete
+      const testCases = await testCasesPromise;
+      sendProgressUpdate({ testCasesGenerated: true });
 
       console.log(`[API] [${requestId}] Solutions and test cases generated, evaluating solutions with model: ${model}...`);
       const bestSolution = await evaluateSolutions(
@@ -82,6 +124,7 @@ router.post('/upload', upload.array('images', 3), async (req, res) => {
         model
       );
       console.log(`[API] [${requestId}] Solution evaluation completed`);
+      sendProgressUpdate({ solutionSelected: true });
 
       const response = {
         success: true,
@@ -93,6 +136,13 @@ router.post('/upload', upload.array('images', 3), async (req, res) => {
       };
 
       console.log(`[API] [${requestId}] Request completed successfully`);
+      
+      // Close all client connections after completion
+      clients.forEach(client => {
+        client.res.end();
+      });
+      clients.clear();
+      
       return res.json(response);
       
     } catch (processingError) {

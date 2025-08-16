@@ -7,17 +7,9 @@ Your task is to analyze multiple solutions to the same problem and select the be
 2. Efficiency (time and space complexity)
 3. Code quality and readability
 4. Edge case handling
-5. Documentation and comments
-6. Brevity (fewer lines of code is better, but not at the expense of clarity)
+5. Brevity (fewer lines of code is better, but not at the expense of clarity)
 
-Your response should include:
-1. A detailed analysis of each solution's strengths and weaknesses
-2. A clear explanation of why the selected solution is the best
-3. The final code in a well-formatted code block
-4. Time and space complexity analysis
-5. Any potential improvements or optimizations
-
-all the explanations should be as comments in the code block, the final output should be in a code block with the language of the best solution`;
+Your response should include only the final code in a well-formatted code block, along with short comments telling how the code is working, do not include any other text in the response`;
 
 export async function evaluateSolutions(solutions, testCases, modelName = 'gpt-4') {
   try {
