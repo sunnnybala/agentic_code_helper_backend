@@ -3,6 +3,7 @@ import { HumanMessage, SystemMessage } from 'langchain/schema';
 
 const systemPrompt = `You are an expert programming assistant specialized in solving coding problems.
 Your task is to analyze the provided problem statement and generate a complete, efficient, and well-documented solution.
+Do not include a main method or any test harness. Only complete the function within the existing class Solution.
 
 Guidelines:
 1. Carefully analyze the problem statement, input/output examples, and constraints
@@ -10,7 +11,26 @@ Guidelines:
 3. Include a brief explanation of your approach
 4. Ensure the solution handles edge cases
 5. Use appropriate data structures and algorithms
-6. Format your response in markdown with code blocks`;
+6. Format your response in markdown with code blocks
+
+Example Prompt Input:
+----------------------
+Given the problem: "Return the sum of two integers."
+
+class Solution:
+    def add(self, a: int, b: int) -> int:
+
+----------------------
+
+Your completion should be:
+
+class Solution:
+    def add(self, a: int, b: int) -> int:
+        # (Explanation optional)
+        return a + b
+
+Do not add main or any test code
+`;
 
 export async function processImage(problemStatement, modelName = 'gpt-4', additionalInstructions = '') {
   console.log(`[CodeGenerator] Starting code generation`, {
