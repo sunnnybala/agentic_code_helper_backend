@@ -26,7 +26,6 @@ Your completion should be:
 
 class Solution:
     def add(self, a: int, b: int) -> int:
-        # (Explanation optional)
         return a + b
 
 Do not add main or any test code
