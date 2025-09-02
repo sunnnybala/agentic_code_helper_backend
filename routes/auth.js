@@ -4,6 +4,7 @@ import prisma from '../lib/prismaClient.js';
 import { hashPassword, verifyPassword } from '../utils/password.js';
 import { signToken, cookieOptions, verifyToken } from '../utils/jwt.js';
 import { signShortLivedToken } from '../utils/jwt.js';
+import { requireAuth } from '../middlewares/auth.js';
 import { OAuth2Client } from 'google-auth-library';
 
 const router = express.Router();
