@@ -16,7 +16,10 @@ export function cookieOptions() {
   return {
     httpOnly: true,
     secure: isProd,
-    sameSite: 'lax',
+    // When the frontend and backend are hosted on different origins (e.g.
+    // Vercel frontend and Render backend), cookies must be sent cross-site.
+    // Browsers require SameSite=None and Secure=true for cross-site cookies.
+    sameSite: isProd ? 'none' : 'lax',
     path: '/',
     maxAge: 7 * 24 * 60 * 60 * 1000
   };

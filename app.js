@@ -49,17 +49,24 @@ const __dirname = dirname(__filename);
 
 // Initialize express app
 const app = express();
+
+// When running behind a reverse proxy (Render, etc.), trust the first proxy
+// so Express can correctly determine protocol and client IP when setting
+// secure cookies and reading X-Forwarded-* headers.
+if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5001;
 
-// Configure CORS with specific options
+// Configure CORS with environment-configurable origin list. In production
+// prefer a single FRONTEND_URL value supplied via environment variables to
+// avoid hard-coding multiple origins. Keep localhost entries for local dev.
+const corsOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 const corsOptions = {
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'https://agentic-code-helper-frontend.vercel.app',
-    'https://code-turtle-ai.vercel.app',
-    process.env.FRONTEND_URL
-  ].filter(Boolean), // This removes any undefined values
+  origin: corsOrigins,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Content-Disposition'],
   credentials: true,
@@ -87,10 +94,11 @@ app.use('/auth', authRoutes);
 app.use('/payments', paymentsRoutes);
 app.use('/api', apiRoutes);
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
+// Optionally serve static frontend build from the backend. When the frontend
+// is deployed separately (e.g. Vercel), set SERVE_FRONTEND=false (default).
+if (process.env.SERVE_FRONTEND === 'true') {
   app.use(express.static(join(__dirname, '../frontend/build')));
-  
+
   app.get('*', (req, res) => {
     res.sendFile(join(__dirname, '../frontend/build/index.html'));
   });
