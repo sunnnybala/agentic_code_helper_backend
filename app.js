@@ -76,7 +76,9 @@ const corsOptions = {
 // Middleware
 app.use(logger.requestLogger);
 app.use(cors(corsOptions));
-app.use(helmet());
+app.use(helmet({
+  crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }
+}));
 app.use(cookieParser());
 const limiter = rateLimit({ windowMs: 60 * 1000, max: 120 });
 app.use(limiter);

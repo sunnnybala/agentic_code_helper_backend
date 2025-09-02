@@ -14,15 +14,40 @@ const clients = new Map();
 const router = express.Router();
 
 // SSE endpoint for progress updates
-router.get('/progress', (req, res) => {
+// Supports short-lived token-based authentication via `?token=...` so the
+// client can connect cross-origin without relying on cookies being sent by
+// EventSource.
+router.get('/progress', async (req, res) => {
   const clientId = Date.now();
   // Allow clients to subscribe to a particular requestId via query param
   const subscribeTo = req.query.requestId || null;
+  const token = req.query.token || null;
+
   const newClient = {
     id: clientId,
     res,
-    subscriptions: new Set(subscribeTo ? [subscribeTo] : [])
+    subscriptions: new Set(subscribeTo ? [subscribeTo] : []),
+    userId: null
   };
+
+  // If a token is provided, verify and associate userId
+  if (token) {
+    try {
+      // Use ESM imports: import verifyToken from utils at top-level.
+      // Lazily import to avoid circular dependency issues.
+      const { verifyToken } = await import('../utils/jwt.js');
+      const payload = verifyToken(token);
+      // only accept tokens with expected shape and purpose
+      if (!payload || !payload.uid) return res.status(401).end();
+      newClient.userId = payload.uid;
+    } catch (e) {
+      return res.status(401).end();
+    }
+  } else if (process.env.NODE_ENV === 'production') {
+    // In production require token-based auth for SSE to avoid relying on
+    // cross-site cookies which are not reliably sent by EventSource.
+    return res.status(401).end();
+  }
 
   // Set headers for SSE
   res.writeHead(200, {

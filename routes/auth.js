@@ -3,6 +3,7 @@ import { z } from 'zod';
 import prisma from '../lib/prismaClient.js';
 import { hashPassword, verifyPassword } from '../utils/password.js';
 import { signToken, cookieOptions, verifyToken } from '../utils/jwt.js';
+import { signShortLivedToken } from '../utils/jwt.js';
 import { OAuth2Client } from 'google-auth-library';
 
 const router = express.Router();
@@ -168,6 +169,18 @@ router.post('/google', async (req, res, next) => {
       return res.status(400).json({ success: false, error: 'Invalid input' });
     }
     next(err);
+  }
+});
+
+// Issue a short-lived token for EventSource (SSE) connections. This endpoint
+// requires the user to be authenticated via the cookie (requireAuth) so the
+// returned token can be used by the client to open a cross-origin SSE.
+router.get('/stream-token', requireAuth, (req, res) => {
+  try {
+    const token = signShortLivedToken({ uid: req.user.id, type: 'sse' }, 300);
+    return res.json({ success: true, token });
+  } catch (e) {
+    return res.status(500).json({ success: false, error: 'Failed to generate token' });
   }
 });
 
