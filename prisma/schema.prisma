@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PaymentStatus {
+  created
+  paid
+  failed
+  refunded
+}
+
+enum CreditLedgerType {
+  purchase
+  debit
+  refund
+  admin_adjustment
+}
+
+model User {
+  id                     Int       @id @default(autoincrement())
+  username               String    @unique
+  email                  String?   @unique
+  name                   String?
+  passwordHash           String?
+  googleId               String?   @unique
+  credits                Int       @default(0)
+  lastLowCreditEmailAt   DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  payments               Payment[]
+  creditLedgerEntries    CreditLedger[]
+}
+
+model Payment {
+  id                 Int           @id @default(autoincrement())
+  userId             Int
+  razorpayOrderId    String        @unique
+  razorpayPaymentId  String?
+  razorpaySignature  String?
+  amountPaise        Int
+  creditsPurchased   Int
+  status             PaymentStatus @default(created)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model CreditLedger {
+  id         Int               @id @default(autoincrement())
+  userId     Int
+  delta      Int
+  type       CreditLedgerType
+  reason     String
+  relatedId  String?
+  createdAt  DateTime          @default(now())
+
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+
+model WebhookEvent {
+  id        Int      @id @default(autoincrement())
+  eventId   String   @unique
+  status    String
+  payload   Json
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+

@@ -32,10 +32,10 @@ export async function generateTestCases(problemStatement, modelName = 'gpt-4', a
     }
     
     prompt += `\n\nProblem Statement:\n${problemStatement}`;
-    console.log(`[TestCaseGenerator] Prompt length: ${prompt.length} chars`);
-    console.log(`[TestCaseGenerator] Prompt: ${prompt}`);
+    console.log('[TestCaseGenerator] Prompt length:', prompt.length);
+    console.log('[TestCaseGenerator] Prompt snippet:', prompt.slice(0, 200));
     const startTime = Date.now();
-    console.log(`[TestCaseGenerator] Sending request to ${modelName}...`);
+    console.log('[TestCaseGenerator] Sending request to model', modelName);
     
     const response = await chat.invoke([
       new SystemMessage(systemPrompt),

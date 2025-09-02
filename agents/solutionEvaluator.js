@@ -41,7 +41,7 @@ Please evaluate the solutions above and provide:
 4. Time and space complexity analysis`;
 
     const startTime = Date.now();
-    console.log(`[SolutionEvaluator] Sending evaluation request to ${modelName}...`);
+    console.log('[SolutionEvaluator] Sending evaluation request to model', modelName);
     
     const response = await chat.invoke([
       new SystemMessage(systemPrompt),
@@ -58,9 +58,8 @@ Please evaluate the solutions above and provide:
     const endTime = Date.now();
     const processingTime = endTime - startTime;
     
-    console.log(`[SolutionEvaluator] Received response from ${modelName} in ${(processingTime / 1000).toFixed(2)}s`);
-    console.log(`[SolutionEvaluator] Evaluation response length: ${response.content?.length || 0} chars`);
-    console.log('[SolutionEvaluator] Raw response:', JSON.stringify(response, null, 2));
+    console.log('[SolutionEvaluator] Received response', { model: modelName, time_s: (processingTime / 1000).toFixed(2), contentLength: response.content?.length || 0 });
+    console.log('[SolutionEvaluator] Raw response snippet:', (response.content || '').slice(0, 300));
 
     const result = {
       bestSolution: response.content,

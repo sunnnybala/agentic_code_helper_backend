@@ -32,11 +32,7 @@ Do not add main or any test code
 `;
 
 export async function processImage(problemStatement, modelName = 'gpt-4', additionalInstructions = '') {
-  console.log(`[CodeGenerator] Starting code generation`, {
-    problemLength: problemStatement?.length || 0,
-    model: modelName,
-    hasAdditionalInstructions: !!additionalInstructions
-  });
+  console.log('[CodeGenerator] Starting code generation', { problemLength: problemStatement?.length || 0, model: modelName, hasAdditionalInstructions: !!additionalInstructions });
   
   try {
     const chat = new ChatOpenAI({
@@ -50,10 +46,11 @@ export async function processImage(problemStatement, modelName = 'gpt-4', additi
     }
     
     prompt += `\n\nProblem Statement:\n${problemStatement}`;
-    console.log(`[CodeGenerator] Prompt length: ${prompt.length} chars`);
-    console.log(`[CodeGenerator] Prompt: ${prompt}`);
+    console.log('[CodeGenerator] Prompt length:', prompt.length);
+    // avoid logging full prompt to prevent leaking large data; log snippet instead
+    console.log('[CodeGenerator] Prompt snippet:', prompt.slice(0, 200));
     const startTime = Date.now();
-    console.log(`[CodeGenerator] Sending request to ${modelName}...`);
+    console.log('[CodeGenerator] Sending request to model', modelName);
     
     const response = await chat.invoke([
       new SystemMessage(systemPrompt),
@@ -70,8 +67,7 @@ export async function processImage(problemStatement, modelName = 'gpt-4', additi
     const endTime = Date.now();
     const processingTime = endTime - startTime;
     
-    console.log(`[CodeGenerator] Received response from ${modelName} in ${(processingTime / 1000).toFixed(2)}s`);
-    console.log(`[CodeGenerator] Generated solution length: ${response.content?.length || 0} chars`);
+    console.log('[CodeGenerator] Received response', { model: modelName, time_s: (processingTime / 1000).toFixed(2), contentLength: response.content?.length || 0 });
 
     return response.content;
   } catch (error) {

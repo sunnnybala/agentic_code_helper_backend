@@ -14,7 +14,7 @@ Guidelines:
 
 export async function processImages(imagesData) {
   try {
-    console.log('[OCRProcessor] Starting image processing for', imagesData.length, 'images');
+    console.log('[OCRProcessor] Starting image processing', { count: imagesData.length });
     
     const chat = new ChatOpenAI({
       modelName: 'gpt-5-mini'
@@ -24,7 +24,7 @@ export async function processImages(imagesData) {
 
     // Prepare image content for the API
     const imageContents = imagesData.map((imageData, index) => {
-      console.log(`[OCRProcessor] Processing image ${index + 1}, size: ${imageData.length} chars`);
+      console.log('[OCRProcessor] Processing image', { index: index + 1, sizeChars: imageData.length });
       return {
         type: 'image_url',
         image_url: { 
@@ -34,7 +34,7 @@ export async function processImages(imagesData) {
       };
     });
 
-    console.log('[OCRProcessor] Sending OCR request to model...');
+    console.log('[OCRProcessor] Sending OCR request to model');
     const startTime = Date.now();
     
     try {
@@ -53,12 +53,10 @@ export async function processImages(imagesData) {
 
       const endTime = Date.now();
       const processingTime = endTime - startTime;
-      
-      console.log(`[OCRProcessor] Received response in ${processingTime / 1000} seconds`);
-      console.log('[OCRProcessor] Extracted content length:', response.content?.length || 0);
-      console.log('[OCRProcessor] First 200 chars of extracted content:', 
-        response.content ? response.content: 'No content');
-      
+
+      console.log('[OCRProcessor] Received response', { time_s: (processingTime / 1000).toFixed(2), contentLength: response.content?.length || 0 });
+      console.log('[OCRProcessor] Extract snippet:', (response.content || '').slice(0, 200));
+
       return response.content;
     } catch (error) {
       console.error('[OCRProcessor] Error during OCR processing:', {
